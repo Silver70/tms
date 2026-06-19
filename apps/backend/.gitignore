@@ -1,0 +1,5 @@
+# Local SQLite database (created by db:migrate / db:seed)
+/data
+*.db
+*.db-wal
+*.db-shm

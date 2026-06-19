@@ -1,0 +1,60 @@
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Role } from '../../shared/enums/role.enum';
+import { UsersRepository, UserWithRole } from './users.repository';
+
+interface CreateVisitorInput {
+  name: string;
+  email: string;
+  passwordHash: string;
+}
+
+@Injectable()
+export class UsersService {
+  constructor(private readonly usersRepo: UsersRepository) {}
+
+  findByEmailWithRole(email: string): Promise<UserWithRole | undefined> {
+    return this.usersRepo.findByEmailWithRole(email);
+  }
+
+  async findByIdWithRole(id: number): Promise<UserWithRole> {
+    const user = await this.usersRepo.findByIdWithRole(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+    return user;
+  }
+
+  listAll(): Promise<UserWithRole[]> {
+    return this.usersRepo.findAllWithRole();
+  }
+
+  async createVisitor(input: CreateVisitorInput): Promise<UserWithRole> {
+    if (await this.usersRepo.emailExists(input.email)) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const role = await this.usersRepo.findRoleBySlug(Role.Visitor);
+    if (!role) {
+      throw new InternalServerErrorException(
+        'visitor role is not seeded — run `npm run db:seed`',
+      );
+    }
+
+    const created = await this.usersRepo.create({
+      name: input.name,
+      email: input.email,
+      passwordHash: input.passwordHash,
+      roleId: role.id,
+    });
+    return { ...created, role: Role.Visitor };
+  }
+
+  async deactivate(id: number): Promise<UserWithRole> {
+    await this.findByIdWithRole(id); // 404 if missing
+    await this.usersRepo.setActive(id, false);
+    return this.findByIdWithRole(id);
+  }
+}
