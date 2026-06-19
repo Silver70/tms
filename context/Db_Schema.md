@@ -16,45 +16,45 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 ## 🔐 IDENTITY & ACCESS
 
-> RBAC model: a user has exactly **one role** (`users.role_id`), which grants a capability (e.g. `hotel_staff`). For staff whose authority is scoped to specific entities, the role is combined with **`user_assignments`** (see below) — the role says *what* they can do, the assignment says *which* hotels/routes/etc. they can do it to. Fine-grained permission-per-role is kept in application code, not in the database.
+> RBAC model: a user has exactly **one role** (`users.role_id`), which grants a capability (e.g. `hotel_staff`). For staff whose authority is scoped to specific entities, the role is combined with **`user_assignments`** (see below) — the role says _what_ they can do, the assignment says _which_ hotels/routes/etc. they can do it to. Fine-grained permission-per-role is kept in application code, not in the database.
 
 ### roles
 
-| Column     | Type         | Constraints   | Description                                                   |
-| ---------- | ------------ | ------------- | ------------------------------------------------------------- |
-| id         | bigint       | PK, increment | Primary key                                                   |
-| name       | varchar(100) | -             | Human-readable name (e.g. "Hotel Staff")                      |
+| Column     | Type         | Constraints   | Description                                                        |
+| ---------- | ------------ | ------------- | ------------------------------------------------------------------ |
+| id         | bigint       | PK, increment | Primary key                                                        |
+| name       | varchar(100) | -             | Human-readable name (e.g. "Hotel Staff")                           |
 | slug       | varchar(50)  | UNIQUE        | Machine slug: visitor, hotel_staff, ferry_staff, park_staff, admin |
-| created_at | timestamp    | -             | Record creation time                                          |
-| updated_at | timestamp    | -             | Record update time                                            |
+| created_at | timestamp    | -             | Record creation time                                               |
+| updated_at | timestamp    | -             | Record update time                                                 |
 
 ### users
 
-| Column            | Type         | Constraints           | Description                                  |
-| ----------------- | ------------ | --------------------- | -------------------------------------------- |
-| id                | bigint       | PK, increment         | Primary key                                  |
-| name              | varchar(255) | -                     | Full name                                    |
-| email             | varchar(255) | UNIQUE                | Login email                                  |
-| password_hash     | varchar(255) | -                     | bcrypt/argon2 hash — never store raw         |
-| role_id           | bigint       | FK → roles.id         | User's role (single role per user)           |
-| phone             | varchar(30)  | nullable              | Optional contact number                      |
-| email_verified_at | timestamp    | nullable              | Set when email is verified (null = unverified) |
-| is_active         | boolean      | default true          | Admin can deactivate an account without deleting |
-| created_at        | timestamp    | -                     | Record creation time                         |
-| updated_at        | timestamp    | -                     | Record update time                           |
+| Column            | Type         | Constraints   | Description                                      |
+| ----------------- | ------------ | ------------- | ------------------------------------------------ |
+| id                | bigint       | PK, increment | Primary key                                      |
+| name              | varchar(255) | -             | Full name                                        |
+| email             | varchar(255) | UNIQUE        | Login email                                      |
+| password_hash     | varchar(255) | -             | bcrypt/argon2 hash — never store raw             |
+| role_id           | bigint       | FK → roles.id | User's role (single role per user)               |
+| phone             | varchar(30)  | nullable      | Optional contact number                          |
+| email_verified_at | timestamp    | nullable      | Set when email is verified (null = unverified)   |
+| is_active         | boolean      | default true  | Admin can deactivate an account without deleting |
+| created_at        | timestamp    | -             | Record creation time                             |
+| updated_at        | timestamp    | -             | Record update time                               |
 
 ### refresh_tokens
 
 > Optional — include only if you want server-side logout / token revocation. Skip if access tokens are short-lived and stateless.
 
-| Column     | Type         | Constraints                   | Description                          |
-| ---------- | ------------ | ----------------------------- | ------------------------------------ |
-| id         | bigint       | PK, increment                 | Primary key                          |
-| user_id    | bigint       | FK → users.id, cascade delete | Token owner                          |
-| token_hash | varchar(255) | UNIQUE                        | Hashed refresh token — never raw     |
-| expires_at | timestamp    | -                             | Expiry time                          |
-| revoked_at | timestamp    | nullable                      | Set on logout / rotation             |
-| created_at | timestamp    | -                             | Record creation time                 |
+| Column     | Type         | Constraints                   | Description                      |
+| ---------- | ------------ | ----------------------------- | -------------------------------- |
+| id         | bigint       | PK, increment                 | Primary key                      |
+| user_id    | bigint       | FK → users.id, cascade delete | Token owner                      |
+| token_hash | varchar(255) | UNIQUE                        | Hashed refresh token — never raw |
+| expires_at | timestamp    | -                             | Expiry time                      |
+| revoked_at | timestamp    | nullable                      | Set on logout / rotation         |
+| created_at | timestamp    | -                             | Record creation time             |
 
 ---
 
@@ -98,19 +98,19 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 ### hotel_bookings
 
-| Column            | Type          | Constraints   | Description                                |
-| ----------------- | ------------- | ------------- | ------------------------------------------ |
-| id                | bigint        | PK, increment | Primary key                                |
-| booking_reference | varchar(20)   | UNIQUE        | Unique booking reference                   |
-| user_id           | bigint        | FK → users.id | User who made the booking                  |
-| room_id           | bigint        | FK → rooms.id | Booked room                                |
-| check_in          | date          | -             | Check-in date                              |
-| check_out         | date          | -             | Check-out date                             |
-| guests            | tinyint       | -             | Number of guests                           |
-| total_amount      | decimal(10,2) | -             | Price snapshot at booking time             |
+| Column            | Type          | Constraints   | Description                                    |
+| ----------------- | ------------- | ------------- | ---------------------------------------------- |
+| id                | bigint        | PK, increment | Primary key                                    |
+| booking_reference | varchar(20)   | UNIQUE        | Unique booking reference                       |
+| user_id           | bigint        | FK → users.id | User who made the booking                      |
+| room_id           | bigint        | FK → rooms.id | Booked room                                    |
+| check_in          | date          | -             | Check-in date                                  |
+| check_out         | date          | -             | Check-out date                                 |
+| guests            | tinyint       | -             | Number of guests                               |
+| total_amount      | decimal(10,2) | -             | Price snapshot at booking time                 |
 | status            | varchar(50)   | -             | Booking status (pending, confirmed, cancelled) |
-| created_at        | timestamp     | -             | Record creation time                       |
-| updated_at        | timestamp     | -             | Record update time                         |
+| created_at        | timestamp     | -             | Record creation time                           |
+| updated_at        | timestamp     | -             | Record update time                             |
 
 ## ⛴️ FERRY DOMAIN
 
@@ -141,20 +141,20 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 ### ferry_bookings
 
-| Column            | Type          | Constraints                  | Description                                  |
-| ----------------- | ------------- | ---------------------------- | -------------------------------------------- |
-| id                | bigint        | PK, increment                | Primary key                                  |
-| booking_reference | varchar(20)   | UNIQUE                       | Unique booking reference                     |
-| user_id           | bigint        | FK → users.id                | User who booked                              |
-| schedule_id       | bigint        | FK → ferry_schedules.id      | Ferry schedule                               |
-| hotel_booking_id  | bigint        | FK → hotel_bookings.id       | Linked hotel booking (enforces valid-stay rule) |
-| passenger_count   | tinyint       | -                            | Number of passengers                         |
-| total_amount      | decimal(10,2) | -                            | Price snapshot at booking time               |
-| validated_by      | bigint        | FK → users.id, nullable      | Ferry operator who validated/issued the pass |
-| validated_at      | timestamp     | nullable                     | When the pass was validated/issued           |
-| status            | varchar(50)   | -                            | Booking status                               |
-| created_at        | timestamp     | -                            | Record creation time                         |
-| updated_at        | timestamp     | -                            | Record update time                           |
+| Column            | Type          | Constraints             | Description                                     |
+| ----------------- | ------------- | ----------------------- | ----------------------------------------------- |
+| id                | bigint        | PK, increment           | Primary key                                     |
+| booking_reference | varchar(20)   | UNIQUE                  | Unique booking reference                        |
+| user_id           | bigint        | FK → users.id           | User who booked                                 |
+| schedule_id       | bigint        | FK → ferry_schedules.id | Ferry schedule                                  |
+| hotel_booking_id  | bigint        | FK → hotel_bookings.id  | Linked hotel booking (enforces valid-stay rule) |
+| passenger_count   | tinyint       | -                       | Number of passengers                            |
+| total_amount      | decimal(10,2) | -                       | Price snapshot at booking time                  |
+| validated_by      | bigint        | FK → users.id, nullable | Ferry operator who validated/issued the pass    |
+| validated_at      | timestamp     | nullable                | When the pass was validated/issued              |
+| status            | varchar(50)   | -                       | Booking status                                  |
+| created_at        | timestamp     | -                       | Record creation time                            |
+| updated_at        | timestamp     | -                       | Record update time                              |
 
 ## 🎢 THEME PARK DOMAIN
 
@@ -170,20 +170,20 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 ### park_tickets
 
-| Column           | Type          | Constraints               | Description                                  |
-| ---------------- | ------------- | ------------------------- | -------------------------------------------- |
-| id               | bigint        | PK, increment             | Primary key                                  |
-| ticket_reference | varchar(20)   | UNIQUE                    | Unique ticket reference                      |
-| user_id          | bigint        | FK → users.id             | Ticket owner                                 |
-| ticket_type_id   | bigint        | FK → park_ticket_types.id | Type of ticket                               |
-| visit_date       | date          | -                         | Date of visit                                |
-| quantity         | tinyint       | -                         | Number of tickets                            |
-| total_amount     | decimal(10,2) | -                         | Price snapshot at purchase time              |
-| channel          | varchar(20)   | -                         | Sales channel: online / gate                 |
+| Column           | Type          | Constraints               | Description                                    |
+| ---------------- | ------------- | ------------------------- | ---------------------------------------------- |
+| id               | bigint        | PK, increment             | Primary key                                    |
+| ticket_reference | varchar(20)   | UNIQUE                    | Unique ticket reference                        |
+| user_id          | bigint        | FK → users.id             | Ticket owner                                   |
+| ticket_type_id   | bigint        | FK → park_ticket_types.id | Type of ticket                                 |
+| visit_date       | date          | -                         | Date of visit                                  |
+| quantity         | tinyint       | -                         | Number of tickets                              |
+| total_amount     | decimal(10,2) | -                         | Price snapshot at purchase time                |
+| channel          | varchar(20)   | -                         | Sales channel: online / gate                   |
 | sold_by_user_id  | bigint        | FK → users.id, nullable   | Staff who sold it (gate sales); null if online |
-| status           | varchar(50)   | -                         | Ticket status                                |
-| created_at       | timestamp     | -                         | Record creation time                         |
-| updated_at       | timestamp     | -                         | Record update time                           |
+| status           | varchar(50)   | -                         | Ticket status                                  |
+| created_at       | timestamp     | -                         | Record creation time                           |
+| updated_at       | timestamp     | -                         | Record update time                             |
 
 ### events
 
@@ -201,68 +201,68 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 ### event_schedules
 
-| Column     | Type     | Constraints    | Description          |
-| ---------- | -------- | -------------- | -------------------- |
-| id         | bigint   | PK, increment  | Primary key          |
-| event_id   | bigint   | FK → events.id | Reference to event   |
-| start_at   | datetime | -              | Start date and time  |
-| capacity   | int      | -              | Maximum capacity     |
-| created_at | timestamp| -              | Record creation time |
-| updated_at | timestamp| -              | Record update time   |
+| Column     | Type      | Constraints    | Description          |
+| ---------- | --------- | -------------- | -------------------- |
+| id         | bigint    | PK, increment  | Primary key          |
+| event_id   | bigint    | FK → events.id | Reference to event   |
+| start_at   | datetime  | -              | Start date and time  |
+| capacity   | int       | -              | Maximum capacity     |
+| created_at | timestamp | -              | Record creation time |
+| updated_at | timestamp | -              | Record update time   |
 
 ### event_bookings
 
-| Column            | Type          | Constraints             | Description                          |
-| ----------------- | ------------- | ----------------------- | ------------------------------------ |
-| id                | bigint        | PK, increment           | Primary key                          |
-| booking_reference | varchar(20)   | UNIQUE                  | Unique booking reference             |
-| user_id           | bigint        | FK → users.id           | User who booked                      |
-| event_schedule_id | bigint        | FK → event_schedules.id | Scheduled event                      |
+| Column            | Type          | Constraints             | Description                               |
+| ----------------- | ------------- | ----------------------- | ----------------------------------------- |
+| id                | bigint        | PK, increment           | Primary key                               |
+| booking_reference | varchar(20)   | UNIQUE                  | Unique booking reference                  |
+| user_id           | bigint        | FK → users.id           | User who booked                           |
+| event_schedule_id | bigint        | FK → event_schedules.id | Scheduled event                           |
 | park_ticket_id    | bigint        | FK → park_tickets.id    | Linked park ticket (enforces ticket rule) |
-| quantity          | tinyint       | -                       | Number of tickets                    |
-| total_amount      | decimal(10,2) | -                       | Price snapshot at booking time       |
-| status            | varchar(50)   | -                       | Booking status                       |
-| created_at        | timestamp     | -                       | Record creation time                 |
-| updated_at        | timestamp     | -                       | Record update time                   |
+| quantity          | tinyint       | -                       | Number of tickets                         |
+| total_amount      | decimal(10,2) | -                       | Price snapshot at booking time            |
+| status            | varchar(50)   | -                       | Booking status                            |
+| created_at        | timestamp     | -                       | Record creation time                      |
+| updated_at        | timestamp     | -                       | Record update time                        |
 
 ## 💰 PAYMENTS
 
 ### payments
 
-| Column            | Type          | Constraints   | Description                                 |
-| ----------------- | ------------- | ------------- | ------------------------------------------- |
-| id                | bigint        | PK, increment | Primary key                                 |
-| user_id           | bigint        | FK → users.id | User who paid                               |
+| Column            | Type          | Constraints   | Description                                              |
+| ----------------- | ------------- | ------------- | -------------------------------------------------------- |
+| id                | bigint        | PK, increment | Primary key                                              |
+| user_id           | bigint        | FK → users.id | User who paid                                            |
 | payable_type      | varchar(50)   | -             | hotel_booking, ferry_booking, event_booking, park_ticket |
-| payable_id        | bigint        | -             | ID of the related booking                   |
-| amount            | decimal(10,2) | -             | Payment amount                              |
-| status            | varchar(50)   | -             | pending, completed, failed, refunded        |
-| method            | varchar(50)   | -             | Payment method (card, cash, etc.)           |
-| payment_reference | char(36)      | -             | Unique payment reference                    |
-| paid_at           | timestamp     | nullable      | Payment completion time (null until paid)   |
-| created_at        | timestamp     | -             | Record creation time                        |
-| updated_at        | timestamp     | -             | Record update time                          |
+| payable_id        | bigint        | -             | ID of the related booking                                |
+| amount            | decimal(10,2) | -             | Payment amount                                           |
+| status            | varchar(50)   | -             | pending, completed, failed, refunded                     |
+| method            | varchar(50)   | -             | Payment method (card, cash, etc.)                        |
+| payment_reference | char(36)      | -             | Unique payment reference                                 |
+| paid_at           | timestamp     | nullable      | Payment completion time (null until paid)                |
+| created_at        | timestamp     | -             | Record creation time                                     |
+| updated_at        | timestamp     | -             | Record update time                                       |
 
 ## 🎁 PROMOTIONS ENGINE
 
 ### promotions
 
-| Column         | Type          | Constraints   | Description                                  |
-| -------------- | ------------- | ------------- | -------------------------------------------- |
-| id             | bigint        | PK, increment | Primary key                                  |
-| name           | varchar(255)  | -             | Promotion name                               |
-| description    | text          | -             | Promotion description                        |
+| Column         | Type          | Constraints      | Description                                         |
+| -------------- | ------------- | ---------------- | --------------------------------------------------- |
+| id             | bigint        | PK, increment    | Primary key                                         |
+| name           | varchar(255)  | -                | Promotion name                                      |
+| description    | text          | -                | Promotion description                               |
 | code           | varchar(50)   | UNIQUE, nullable | Coupon code for customer entry; null = auto-applied |
-| discount_type  | varchar(20)   | -             | percentage or fixed                          |
-| discount_value | decimal(10,2) | -             | Discount value                               |
-| min_spend      | decimal(10,2) | nullable      | Minimum order amount to qualify              |
-| usage_limit    | int unsigned  | nullable      | Global redemption cap; null = unlimited      |
-| per_user_limit | int unsigned  | nullable      | Per-user redemption cap; null = unlimited    |
-| valid_from     | datetime      | -             | Valid from                                   |
-| valid_to       | datetime      | -             | Valid until                                  |
-| is_active      | boolean       | -             | Active status                                |
-| created_at     | timestamp     | -             | Record creation time                         |
-| updated_at     | timestamp     | -             | Record update time                           |
+| discount_type  | varchar(20)   | -                | percentage or fixed                                 |
+| discount_value | decimal(10,2) | -                | Discount value                                      |
+| min_spend      | decimal(10,2) | nullable         | Minimum order amount to qualify                     |
+| usage_limit    | int unsigned  | nullable         | Global redemption cap; null = unlimited             |
+| per_user_limit | int unsigned  | nullable         | Per-user redemption cap; null = unlimited           |
+| valid_from     | datetime      | -                | Valid from                                          |
+| valid_to       | datetime      | -                | Valid until                                         |
+| is_active      | boolean       | -                | Active status                                       |
+| created_at     | timestamp     | -                | Record creation time                                |
+| updated_at     | timestamp     | -                | Record update time                                  |
 
 ### promotion_targets
 
@@ -311,12 +311,12 @@ These apply across every table below unless a table explicitly notes otherwise:
 
 > Scopes a staff user to the specific entities they manage. Works together with `users.role_id`: the role grants the capability (e.g. `hotel_staff`), this table restricts it to specific instances (e.g. Hotel #3). Checked at the application layer via an ownership guard.
 
-| Column          | Type        | Constraints                   | Description                 |
-| --------------- | ----------- | ----------------------------- | --------------------------- |
-| id              | bigint      | PK, increment                 | Primary key                 |
-| user_id         | bigint      | FK → users.id, cascade delete | Assigned user               |
-| assignable_type | varchar(50) | -                             | Type of entity (e.g. Hotel) |
-| assignable_id   | bigint      | -                             | ID of the assigned entity   |
+| Column          | Type        | Constraints                   | Description                  |
+| --------------- | ----------- | ----------------------------- | ---------------------------- |
+| id              | bigint      | PK, increment                 | Primary key                  |
+| user_id         | bigint      | FK → users.id, cascade delete | Assigned user                |
+| assignable_type | varchar(50) | -                             | Type of entity (e.g. Hotel)  |
+| assignable_id   | bigint      | -                             | ID of the assigned entity    |
 | created_at      | timestamp   | -                             | When the assignment was made |
 
 **Note:** Unique constraint on `(user_id, assignable_type, assignable_id)`
