@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { jwtConfig } from '../../config/jwt.config';
+import { durationToMs } from '../../shared/utils/duration';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 import { UserWithRole } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -88,7 +89,7 @@ export class AuthService {
     await this.refreshTokenRepo.create(
       user.id,
       this.hashToken(rawRefresh),
-      new Date(Date.now() + this.durationToMs(this.config.refreshExpires)),
+      new Date(Date.now() + durationToMs(this.config.refreshExpires)),
     );
 
     return {
@@ -96,26 +97,11 @@ export class AuthService {
       accessToken,
       refreshToken: rawRefresh,
       tokenType: 'Bearer',
-      expiresIn: Math.floor(
-        this.durationToMs(this.config.accessExpires) / 1000,
-      ),
+      expiresIn: Math.floor(durationToMs(this.config.accessExpires) / 1000),
     };
   }
 
   private hashToken(raw: string): string {
     return createHash('sha256').update(raw).digest('hex');
-  }
-
-  /** Parses durations like `15m`, `7d`, `12h`, `30s`. Falls back to a raw number of ms. */
-  private durationToMs(value: string): number {
-    const match = /^(\d+)([smhd])$/.exec(value.trim());
-    if (!match) return Number(value) || 0;
-    const factors: Record<string, number> = {
-      s: 1_000,
-      m: 60_000,
-      h: 3_600_000,
-      d: 86_400_000,
-    };
-    return Number(match[1]) * factors[match[2]];
   }
 }

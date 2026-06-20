@@ -16,13 +16,13 @@ export class RegisterDto {
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )
-  name: string;
+  name!: string;
 
   @IsEmail()
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.toLowerCase().trim() : value,
   )
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
@@ -31,5 +31,5 @@ export class RegisterDto {
     message:
       'Password must contain an uppercase letter, a lowercase letter, and a number',
   })
-  password: string;
+  password!: string;
 }

@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { UsersModule } from '../users/users.module';
+import { AuthCookieService } from './auth-cookie.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RefreshTokenRepository } from './refresh-token.repository';
@@ -28,6 +29,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshTokenRepository],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RefreshTokenRepository,
+    AuthCookieService,
+  ],
 })
 export class AuthModule {}

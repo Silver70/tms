@@ -1,0 +1,30 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryOptions } from '@tanstack/react-query';
+import { useRouter } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { getErrorMessage, logoutRequest } from './api';
+import { getCurrentUser } from './server';
+
+/** Shared query for the current user. Source of truth for auth state. */
+export const meQueryOptions = queryOptions({
+  queryKey: ['auth', 'me'] as const,
+  queryFn: () => getCurrentUser(),
+  staleTime: 5 * 60 * 1000,
+});
+
+/** Logout mutation: clears the session and returns home. */
+export function useLogout() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: logoutRequest,
+    onSuccess: async () => {
+      queryClient.setQueryData(meQueryOptions.queryKey, null);
+      await router.invalidate();
+      toast.success('Signed out');
+      await router.navigate({ to: '/' });
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  });
+}

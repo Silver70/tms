@@ -8,6 +8,8 @@ export const validationSchema = Joi.object({
 
   DATABASE_PATH: Joi.string().default('./data/dev.db'),
 
+  CORS_ORIGIN: Joi.string().uri().default('http://localhost:3000'),
+
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_EXPIRES: Joi.string().default('15m'),
   JWT_REFRESH_EXPIRES: Joi.string().default('7d'),
