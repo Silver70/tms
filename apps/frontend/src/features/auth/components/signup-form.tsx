@@ -1,22 +1,22 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useRouter } from '@tanstack/react-router';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { Button } from '~/components/ui/button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '~/components/ui/field';
-import { Input } from '~/components/ui/input';
-import { cn } from '~/lib/utils';
-import { getErrorMessage, getErrorStatus, registerRequest } from '../api';
-import { meQueryOptions } from '../queries';
-import { signupSchema, type SignupValues } from '../schemas';
-import { SocialLogins } from './social-logins';
+} from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
+import { cn } from "~/lib/utils";
+import { getErrorMessage, getErrorStatus, registerRequest } from "../api";
+import { meQueryOptions } from "../queries";
+import { signupSchema, type SignupValues } from "../schemas";
+import { SocialLogins } from "./social-logins";
 
 export function SignupForm({ className }: { className?: string }) {
   const router = useRouter();
@@ -40,19 +40,19 @@ export function SignupForm({ className }: { className?: string }) {
       queryClient.setQueryData(meQueryOptions.queryKey, user);
       await router.invalidate();
       toast.success(`Welcome, ${user.name}!`);
-      await navigate({ to: '/' });
+      await navigate({ to: "/" });
     },
     onError: (err) =>
       toast.error(
         getErrorStatus(err) === 409
-          ? 'That email is already registered'
+          ? "That email is already registered"
           : getErrorMessage(err),
       ),
   });
 
   return (
     <form
-      className={cn('flex flex-col gap-6', className)}
+      className={cn("flex flex-col gap-6", className)}
       onSubmit={handleSubmit((values) => mutation.mutate(values))}
       noValidate
     >
@@ -65,7 +65,7 @@ export function SignupForm({ className }: { className?: string }) {
         </div>
         <Field>
           <FieldLabel htmlFor="name">Full name</FieldLabel>
-          <Input id="name" autoComplete="name" {...register('name')} />
+          <Input id="name" autoComplete="name" {...register("name")} />
           <FieldError>{errors.name?.message}</FieldError>
         </Field>
         <Field>
@@ -75,7 +75,7 @@ export function SignupForm({ className }: { className?: string }) {
             type="email"
             placeholder="m@example.com"
             autoComplete="email"
-            {...register('email')}
+            {...register("email")}
           />
           <FieldError>{errors.email?.message}</FieldError>
         </Field>
@@ -85,7 +85,7 @@ export function SignupForm({ className }: { className?: string }) {
             id="password"
             type="password"
             autoComplete="new-password"
-            {...register('password')}
+            {...register("password")}
           />
           <FieldError>{errors.password?.message}</FieldError>
         </Field>
@@ -95,18 +95,18 @@ export function SignupForm({ className }: { className?: string }) {
             id="confirmPassword"
             type="password"
             autoComplete="new-password"
-            {...register('confirmPassword')}
+            {...register("confirmPassword")}
           />
           <FieldError>{errors.confirmPassword?.message}</FieldError>
         </Field>
         <Field>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Creating account…' : 'Create account'}
+            {mutation.isPending ? "Creating account…" : "Create account"}
           </Button>
         </Field>
         <SocialLogins />
         <FieldDescription className="text-center">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link to="/login" className="underline underline-offset-4">
             Sign in
           </Link>

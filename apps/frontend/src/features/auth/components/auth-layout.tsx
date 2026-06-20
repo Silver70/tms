@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
+import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
 /** Full-screen split layout (login-02): branded form column + image column. */
 export function AuthLayout({ children }: { children: ReactNode }) {
@@ -20,8 +20,8 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       </div>
       <div className="relative hidden lg:block">
         <img
-          src="/images/asbatract-wallpaper.webp"
-          alt=""
+          src="/images/rose-red-wall.png"
+          alt="an abstract background"
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
